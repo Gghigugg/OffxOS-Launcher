@@ -75,16 +75,17 @@ public class WidgetsActivity extends Activity {
         AppWidgetProviderInfo info=AppWidgetManager.getInstance(this).getAppWidgetInfo(id);
         if(info==null){deletePending();return;}
         addWidgetCard(id,info,false);
-        saveId(id);pendingId=AppWidgetManager.INVALID_APPWIDGET_ID;
+        OffxHomeWidgetStore.add(this,id);
+        pendingId=AppWidgetManager.INVALID_APPWIDGET_ID;
     }
 
     void restoreWidgets(){
         if(list==null)return;
         list.removeAllViews();
-        for(int id:loadIds()){
+        for(int id:OffxHomeWidgetStore.load(this)){
             AppWidgetProviderInfo info=AppWidgetManager.getInstance(this).getAppWidgetInfo(id);
             if(info!=null)addWidgetCard(id,info,true);
-            else {host.deleteAppWidgetId(id);removeSaved(id);}
+            else {host.deleteAppWidgetId(id);OffxHomeWidgetStore.remove(this,id);}
         }
     }
 
@@ -96,13 +97,10 @@ public class WidgetsActivity extends Activity {
         LinearLayout wrap=new LinearLayout(this);wrap.setOrientation(LinearLayout.VERTICAL);wrap.setPadding(0,dp(6),0,dp(6));
         wrap.addView(view,new LinearLayout.LayoutParams(-1,0,1));
         wrap.addView(remove,new LinearLayout.LayoutParams(-1,dp(36)));
-        remove.setOnClickListener(x->{host.deleteAppWidgetId(id);removeSaved(id);list.removeView(wrap);});
+        remove.setOnClickListener(x->{host.deleteAppWidgetId(id);OffxHomeWidgetStore.remove(this,id);list.removeView(wrap);});
         list.addView(wrap,new LinearLayout.LayoutParams(-1,dp(222)));
         if(!restored) PremiumHomeMotion.entrance(wrap,list.getChildCount()-1,false);
     }
 
     void deletePending(){if(pendingId!=AppWidgetManager.INVALID_APPWIDGET_ID)host.deleteAppWidgetId(pendingId);pendingId=AppWidgetManager.INVALID_APPWIDGET_ID;}
-    void saveId(int id){Set<String> s=getPreferences(0).getStringSet("ids",new LinkedHashSet<>());Set<String> n=new LinkedHashSet<>(s);n.add(String.valueOf(id));getPreferences(0).edit().putStringSet("ids",n).apply();}
-    void removeSaved(int id){Set<String> n=new LinkedHashSet<>(getPreferences(0).getStringSet("ids",new LinkedHashSet<>()));n.remove(String.valueOf(id));getPreferences(0).edit().putStringSet("ids",n).apply();}
-    ArrayList<Integer> loadIds(){ArrayList<Integer> out=new ArrayList<>();for(String s:getPreferences(0).getStringSet("ids",new LinkedHashSet<>()))try{out.add(Integer.parseInt(s));}catch(Exception ignored){}return out;}
 }
