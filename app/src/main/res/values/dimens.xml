@@ -1,0 +1,5 @@
+<resources>
+    <dimen name="offx_corner">28dp</dimen>
+    <dimen name="offx_spacing">16dp</dimen>
+    <dimen name="offx_icon_size">64dp</dimen>
+</resources>
