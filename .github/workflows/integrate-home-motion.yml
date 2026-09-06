@@ -1,0 +1,40 @@
+name: Integrate Premium Home Motion
+on:
+  push:
+    branches: [ main ]
+permissions:
+  contents: write
+jobs:
+  integrate:
+    if: ${{ !contains(github.event.head_commit.message, 'Wire Premium Home motion into launcher icons and folders') }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Patch MainActivity
+        shell: python
+        run: |
+          from pathlib import Path
+          p = Path('app/src/main/java/com/offxos/launcher/MainActivity.java')
+          s = p.read_text()
+          old = 'void addFolder(LinearLayout parent,FolderStore.Folder f){LinearLayout box=new LinearLayout(this);box.setOrientation(LinearLayout.VERTICAL);box.setGravity(Gravity.CENTER);TextView icon=tv("▦",29);icon.setBackground(glass());box.addView(icon,new LinearLayout.LayoutParams(dp(54),dp(54)));TextView name=tv(f.name,10);name.setSingleLine();box.addView(name,new LinearLayout.LayoutParams(dp(78),dp(22)));box.setOnClickListener(v->openFolder(f.name));parent.addView(box,new LinearLayout.LayoutParams(0,-1,1));}'
+          new = 'void addFolder(LinearLayout parent,FolderStore.Folder f){LinearLayout box=new LinearLayout(this);box.setOrientation(LinearLayout.VERTICAL);box.setGravity(Gravity.CENTER);TextView icon=tv("▦",29);icon.setBackground(glass());box.addView(icon,new LinearLayout.LayoutParams(dp(54),dp(54)));TextView name=tv(f.name,10);name.setSingleLine();box.addView(name,new LinearLayout.LayoutParams(dp(78),dp(22)));int index=parent.getChildCount();PremiumHomeMotion.entrance(box,index,performanceStore.isLiteMode());box.setOnClickListener(v->{PremiumHomeMotion.press(v,performanceStore.isLiteMode());postDelayed(()->openFolder(f.name),performanceStore.isLiteMode()?80:150);});parent.addView(box,new LinearLayout.LayoutParams(0,-1,1));}'
+          if old not in s: raise SystemExit('folder pattern not found')
+          s = s.replace(old,new,1)
+          old = 'frame.setOnClickListener(v->{v.animate().scaleX(.90f).scaleY(.90f).setDuration(80).withEndAction(()->{v.animate().scaleX(1f).scaleY(1f).setDuration(230).setInterpolator(new OvershootInterpolator(2f)).start();try{startActivity(a.intent);}catch(Exception ignored){}}).start();});frame.setOnLongClickListener(v->{appActions(a);return true;});parent.addView(frame,new LinearLayout.LayoutParams(0,-1,1));}'
+          new = 'int index=parent.getChildCount();PremiumHomeMotion.entrance(frame,index,performanceStore.isLiteMode());frame.setOnClickListener(v->{PremiumHomeMotion.press(v,performanceStore.isLiteMode());postDelayed(()->{try{startActivity(a.intent);}catch(Exception ignored){}},performanceStore.isLiteMode()?80:150);});frame.setOnLongClickListener(v->{appActions(a);return true;});parent.addView(frame,new LinearLayout.LayoutParams(0,-1,1));}'
+          if old not in s: raise SystemExit('app pattern not found')
+          s = s.replace(old,new,1)
+          p.write_text(s)
+      - name: Commit integration
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add app/src/main/java/com/offxos/launcher/MainActivity.java .github/workflows/integrate-home-motion.yml
+          git commit -m "Wire Premium Home motion into launcher icons and folders"
+          git push
+      - name: Remove one-shot workflow
+        if: ${{ success() }}
+        run: |
+          git rm .github/workflows/integrate-home-motion.yml || true
+          git commit -m "Remove one-shot home motion integration workflow" || true
+          git push || true
