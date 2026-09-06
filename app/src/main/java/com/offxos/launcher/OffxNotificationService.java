@@ -12,12 +12,7 @@ public class OffxNotificationService extends NotificationListenerService {
     private static final ArrayList<Notice> notices = new ArrayList<>();
     private static final String PREFS = "offx_notifications";
     private static final String KEY_DATA = "data";
-
-    public static class Notice {
-        public final String key, title, text, app;
-        public final long when;
-        Notice(String key,String title,String text,String app,long when){this.key=key;this.title=title;this.text=text;this.app=app;this.when=when;}
-    }
+    public static class Notice { public final String key,title,text,app; public final long when; Notice(String k,String t,String x,String a,long w){key=k;title=t;text=x;app=a;when=w;} }
     public static synchronized List<Notice> getNotices(){return new ArrayList<>(notices);}
     private void save(){StringBuilder b=new StringBuilder();for(Notice n:notices)b.append(esc(n.key)).append('|').append(esc(n.title)).append('|').append(esc(n.text)).append('|').append(esc(n.app)).append('|').append(n.when).append('\n');getSharedPreferences(PREFS,MODE_PRIVATE).edit().putString(KEY_DATA,b.toString()).apply();}
     private static String esc(String s){return s==null?"":s.replace("\\","\\\\").replace("|","\\p").replace("\n","\\n");}
@@ -26,9 +21,10 @@ public class OffxNotificationService extends NotificationListenerService {
     @Override public void onListenerConnected(){synchronized(this){notices.clear();}loadSaved();try{StatusBarNotification[] a=getActiveNotifications();if(a!=null)for(StatusBarNotification s:a)addOrUpdate(s);}catch(Exception ignored){}}
     private synchronized void addOrUpdate(StatusBarNotification sbn){Notification n=sbn.getNotification();CharSequence t=n.extras.getCharSequence(Notification.EXTRA_TITLE);CharSequence x=n.extras.getCharSequence(Notification.EXTRA_TEXT);String key=sbn.getKey();for(int i=notices.size()-1;i>=0;i--)if(key.equals(notices.get(i).key))notices.remove(i);notices.add(0,new Notice(key,t==null?"Notification":t.toString(),x==null?"":x.toString(),sbn.getPackageName(),System.currentTimeMillis()));if(notices.size()>40)notices.remove(notices.size()-1);count=notices.size();save();}
     @Override public void onNotificationPosted(StatusBarNotification sbn){addOrUpdate(sbn);}
-    @Override public synchronized void onNotificationRemoved(StatusBarNotification sbn){String key=sbn.getKey();for(int i=notices.size()-1;i>=0;i--)if(key.equals(notices.get(i).key)){notices.remove(i);break;}count=notices.size();save();}
+    @Override public synchronized void onNotificationRemoved(StatusBarNotification sbn){removeLocal(sbn.getKey());}
     public synchronized void dismiss(String key){removeLocal(key);try{cancelNotification(key);}catch(Exception ignored){}}
-    private void removeLocal(String key){for(int i=notices.size()-1;i>=0;i--)if(key.equals(notices.get(i).key)){notices.remove(i);break;}count=notices.size();save();}
-    public static synchronized void dismissFromCenter(String key){for(int i=notices.size()-1;i>=0;i--)if(key.equals(notices.get(i).key)){notices.remove(i);break;}count=notices.size();}
+    private synchronized void removeLocal(String key){for(int i=notices.size()-1;i>=0;i--)if(key.equals(notices.get(i).key)){notices.remove(i);break;}count=notices.size();save();}
+    public static synchronized void dismissFromCenter(android.content.Context c,String key){for(int i=notices.size()-1;i>=0;i--)if(key.equals(notices.get(i).key)){notices.remove(i);break;}count=notices.size();c.getSharedPreferences(PREFS,android.content.Context.MODE_PRIVATE).edit().putString(KEY_DATA,serialize()).apply();}
+    private static String serialize(){StringBuilder b=new StringBuilder();for(Notice n:notices)b.append(esc(n.key)).append('|').append(esc(n.title)).append('|').append(esc(n.text)).append('|').append(esc(n.app)).append('|').append(n.when).append('\n');return b.toString();}
     public static synchronized void clearFromCenter(android.content.Context c){notices.clear();count=0;c.getSharedPreferences(PREFS,android.content.Context.MODE_PRIVATE).edit().remove(KEY_DATA).apply();}
 }
