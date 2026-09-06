@@ -21,7 +21,7 @@ public class NotificationCenterActivity extends Activity {
         LinearLayout root=new LinearLayout(this);root.setOrientation(LinearLayout.VERTICAL);root.setPadding(dp(16),dp(38),dp(16),dp(12));root.setBackgroundColor(0xFF08090D);
         LinearLayout head=new LinearLayout(this);head.setGravity(Gravity.CENTER_VERTICAL);
         TextView title=t("Notifications",28);title.setTypeface(null,1);head.addView(title,new LinearLayout.LayoutParams(0,dp(50),1));
-        TextView clear=t("Clear",13);clear.setGravity(Gravity.CENTER);clear.setBackground(glass());clear.setOnClickListener(v->{OffxNotificationService.getNotices().forEach(n->OffxNotificationService.dismissFromCenter(n.key));build();});
+        TextView clear=t("Clear",13);clear.setGravity(Gravity.CENTER);clear.setBackground(glass());clear.setOnClickListener(v->{for(OffxNotificationService.Notice n:OffxNotificationService.getNotices())OffxNotificationService.dismissFromCenter(n.key);build();});
         LinearLayout.LayoutParams clp=new LinearLayout.LayoutParams(dp(62),dp(42));clp.setMargins(0,0,dp(7),0);head.addView(clear,clp);
         TextView close=t("✕",20);close.setGravity(Gravity.CENTER);close.setBackground(glass());close.setOnClickListener(v->finish());head.addView(close,new LinearLayout.LayoutParams(dp(48),dp(48)));root.addView(head);
         TextView sub=t("OffxOS Notification Center  •  swipe left to dismiss",12);sub.setTextColor(0xAAFFFFFF);root.addView(sub,new LinearLayout.LayoutParams(-1,dp(28)));
@@ -41,7 +41,7 @@ public class NotificationCenterActivity extends Activity {
         card.setOnTouchListener((v,e)->{
             if(e.getAction()==MotionEvent.ACTION_DOWN){down[0]=e.getX();return true;}
             if(e.getAction()==MotionEvent.ACTION_MOVE){float dx=e.getX()-down[0];if(dx<0){v.setTranslationX(dx);v.setAlpha(Math.max(.25f,1f+dx/dp(220)));}return true;}
-            if(e.getAction()==MotionEvent.ACTION_UP){float dx=e.getX()-down[0];if(dx<-dp(90)){v.animate().translationX(-getWidth()).alpha(0).setDuration(180).withEndAction(()->{OffxNotificationService.dismissFromCenter(n.key);build();}).start();}else v.animate().translationX(0).alpha(1).setDuration(160).start();return true;}
+            if(e.getAction()==MotionEvent.ACTION_UP){float dx=e.getX()-down[0];if(dx<-dp(90)){v.animate().translationX(-card.getWidth()).alpha(0).setDuration(180).withEndAction(()->{OffxNotificationService.dismissFromCenter(n.key);build();}).start();}else v.animate().translationX(0).alpha(1).setDuration(160).start();return true;}
             if(e.getAction()==MotionEvent.ACTION_CANCEL){v.animate().translationX(0).alpha(1).setDuration(160).start();return true;}return true;
         });
         LinearLayout.LayoutParams cp=new LinearLayout.LayoutParams(-1,dp(96));cp.setMargins(0,dp(6),0,dp(6));list.addView(card,cp);
