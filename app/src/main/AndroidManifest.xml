@@ -8,6 +8,7 @@
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
         </activity>
+        <activity android:name=".HomeSettingsActivity" android:screenOrientation="portrait" android:exported="false" />
         <activity android:name=".LockScreenActivity" android:screenOrientation="portrait" android:exported="false" />
         <activity android:name=".NotificationCenterActivity" android:screenOrientation="portrait" android:exported="false" />
         <activity android:name=".MusicPanelActivity" android:screenOrientation="portrait" android:exported="false" />
