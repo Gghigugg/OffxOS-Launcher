@@ -1,21 +1,92 @@
 package com.offxos.launcher;
 
+import android.appwidget.AppWidgetManager;
+import android.appwidget.AppWidgetProviderInfo;
 import android.content.Context;
 import android.graphics.*;
+import android.view.Gravity;
 import android.view.View;
+import android.widget.FrameLayout;
+import android.appwidget.AppWidgetHostView;
+import java.util.ArrayList;
 
-public class DynamicWallpaperView extends View {
+/** Dynamic Liquid Glass wallpaper plus the persistent Home widget layer. */
+public class DynamicWallpaperView extends FrameLayout {
     private final Paint paint=new Paint(Paint.ANTI_ALIAS_FLAG);
     private final PerformanceStore performance;
     private final ThemeStore theme;
+    private final OffxWidgetHost widgetHost;
+    private final FrameLayout widgetLayer;
     private float phase=0f;
     private long lastFrame=0L;
+    private boolean widgetsStarted=false;
+
     public DynamicWallpaperView(Context c){
         super(c);
         performance=new PerformanceStore(c);
         theme=new ThemeStore(c);
+        widgetHost=new OffxWidgetHost(c);
+        widgetLayer=new FrameLayout(c);
+        widgetLayer.setClipChildren(false);
+        widgetLayer.setClipToPadding(false);
+        widgetLayer.setPadding(dp(14),dp(6),dp(14),dp(6));
+        addView(widgetLayer,new FrameLayout.LayoutParams(-1,dp(190),Gravity.BOTTOM));
         setLayerType(View.LAYER_TYPE_HARDWARE,null);
+        setWillNotDraw(false);
     }
+
+    int dp(float n){return(int)(n*getResources().getDisplayMetrics().density+.5f);}
+
+    @Override protected void onAttachedToWindow(){
+        super.onAttachedToWindow();
+        startWidgets();
+    }
+
+    private void startWidgets(){
+        if(widgetsStarted)return;
+        try{widgetHost.startListening();widgetsStarted=true;restoreWidgets();}catch(Exception ignored){}
+    }
+
+    private void stopWidgets(){
+        if(!widgetsStarted)return;
+        try{widgetHost.stopListening();}catch(Exception ignored){}
+        widgetsStarted=false;
+    }
+
+    private void restoreWidgets(){
+        widgetLayer.removeAllViews();
+        ArrayList<Integer> ids=OffxHomeWidgetStore.load(getContext());
+        AppWidgetManager manager=AppWidgetManager.getInstance(getContext());
+        int shown=0;
+        for(int id:ids){
+            AppWidgetProviderInfo info=manager.getAppWidgetInfo(id);
+            if(info==null){
+                try{widgetHost.deleteAppWidgetId(id);}catch(Exception ignored){}
+                OffxHomeWidgetStore.remove(getContext(),id);
+                continue;
+            }
+            try{
+                AppWidgetHostView view=widgetHost.createView(getContext(),id,info);
+                view.setPadding(dp(8),dp(8),dp(8),dp(8));
+                view.setBackground(widgetGlass());
+                FrameLayout.LayoutParams lp=new FrameLayout.LayoutParams(-1,dp(174));
+                lp.setMargins(0,dp(6),0,dp(6));
+                widgetLayer.addView(view,lp);
+                shown++;
+                if(shown>=1)break;
+            }catch(Exception ignored){}
+        }
+        widgetLayer.setVisibility(shown==0?View.GONE:View.VISIBLE);
+    }
+
+    private android.graphics.drawable.GradientDrawable widgetGlass(){
+        android.graphics.drawable.GradientDrawable g=new android.graphics.drawable.GradientDrawable();
+        g.setColor(theme.isLight()?0xEAFBFCFF:0xCC151821);
+        g.setCornerRadius(dp(26));
+        g.setStroke(dp(1),theme.isLight()?0x55FFFFFF:0x35FFFFFF);
+        return g;
+    }
+
     @Override protected void onDraw(Canvas c){
         super.onDraw(c);
         int w=getWidth(),h=getHeight();
@@ -48,10 +119,13 @@ public class DynamicWallpaperView extends View {
         paint.setShader(null);
         postDelayed(invalidateTask,90);
     }
+
     private final Runnable invalidateTask=new Runnable(){@Override public void run(){invalidate();}};
+
     @Override protected void onDetachedFromWindow(){
         removeCallbacks(invalidateTask);
         lastFrame=0L;
+        stopWidgets();
         super.onDetachedFromWindow();
     }
 }
