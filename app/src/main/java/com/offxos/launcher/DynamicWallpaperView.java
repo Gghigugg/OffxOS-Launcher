@@ -38,8 +38,17 @@ public class DynamicWallpaperView extends FrameLayout {
     private void startWidgets(){if(widgetsStarted)return;try{widgetHost.startListening();widgetsStarted=true;restoreWidgets();}catch(Exception ignored){}}
     private void stopWidgets(){if(!widgetsStarted)return;try{widgetHost.stopListening();}catch(Exception ignored){}widgetsStarted=false;}
     private void restoreWidgets(){
-        widgetLayer.removeAllViews(); ArrayList<Integer> ids=OffxHomeWidgetStore.load(getContext()); AppWidgetManager manager=AppWidgetManager.getInstance(getContext()); int index=0;
-        for(int id:ids){AppWidgetProviderInfo info=manager.getAppWidgetInfo(id); if(info==null){try{widgetHost.deleteAppWidgetId(id);}catch(Exception ignored){} OffxHomeWidgetStore.remove(getContext(),id); OffxHomeWidgetLayoutStore.remove(getContext(),id); continue;} try{addHomeWidget(id,info,index++);}catch(Exception ignored){}}
+        widgetLayer.removeAllViews();
+        ArrayList<Integer> ids=OffxHomeWidgetStore.load(getContext());
+        OffxHomeWidgetOrderStore.sync(getContext(),ids);
+        ArrayList<Integer> ordered=OffxHomeWidgetOrderStore.load(getContext());
+        AppWidgetManager manager=AppWidgetManager.getInstance(getContext());
+        int index=0;
+        for(int id:ordered){
+            AppWidgetProviderInfo info=manager.getAppWidgetInfo(id);
+            if(info==null){try{widgetHost.deleteAppWidgetId(id);}catch(Exception ignored){} OffxHomeWidgetStore.remove(getContext(),id); OffxHomeWidgetLayoutStore.remove(getContext(),id); OffxHomeWidgetOrderStore.remove(getContext(),id); continue;}
+            try{addHomeWidget(id,info,index++);}catch(Exception ignored){}
+        }
         widgetScroll.setVisibility(widgetLayer.getChildCount()==0?View.GONE:View.VISIBLE);
     }
     private void addHomeWidget(int id,AppWidgetProviderInfo info,int index){
@@ -53,8 +62,13 @@ public class DynamicWallpaperView extends FrameLayout {
     }
     private TextView widgetLabel(String text){TextView t=new TextView(getContext());t.setText(text);t.setTextColor(0xAAFFFFFF);t.setTextSize(10);t.setGravity(Gravity.CENTER);return t;}
     private void showWidgetEditor(int id){
-        final String[] items={"Compact widget","Standard widget","Large widget","Remove widget"};
-        new AlertDialog.Builder(getContext()).setTitle("OffxOS Widget").setItems(items,(d,which)->{if(which<=2){OffxHomeWidgetLayoutStore.setSize(getContext(),id,which);restoreWidgets();}else{try{widgetHost.deleteAppWidgetId(id);}catch(Exception ignored){} OffxHomeWidgetStore.remove(getContext(),id); OffxHomeWidgetLayoutStore.remove(getContext(),id); restoreWidgets();}}).show();
+        final String[] items={"Move Left","Move Right","Compact widget","Standard widget","Large widget","Remove widget"};
+        new AlertDialog.Builder(getContext()).setTitle("OffxOS Widget").setItems(items,(d,which)->{
+            if(which==0){OffxHomeWidgetOrderStore.move(getContext(),id,-1);restoreWidgets();}
+            else if(which==1){OffxHomeWidgetOrderStore.move(getContext(),id,1);restoreWidgets();}
+            else if(which<=4){OffxHomeWidgetLayoutStore.setSize(getContext(),id,which-2);restoreWidgets();}
+            else{try{widgetHost.deleteAppWidgetId(id);}catch(Exception ignored){} OffxHomeWidgetStore.remove(getContext(),id); OffxHomeWidgetLayoutStore.remove(getContext(),id); OffxHomeWidgetOrderStore.remove(getContext(),id); restoreWidgets();}
+        }).show();
     }
     private android.graphics.drawable.GradientDrawable widgetGlass(){android.graphics.drawable.GradientDrawable g=new android.graphics.drawable.GradientDrawable();g.setColor(theme.isLight()?0xEAFBFCFF:0xCC151821);g.setCornerRadius(dp(26));g.setStroke(dp(1),theme.isLight()?0x55FFFFFF:0x35FFFFFF);return g;}
     @Override protected void onDraw(Canvas c){
