@@ -1,0 +1,6 @@
+<resources>
+    <color name="offx_black">#08090D</color>
+    <color name="offx_white">#FFFFFF</color>
+    <color name="offx_glass">#35FFFFFF</color>
+    <color name="offx_glass_stroke">#55FFFFFF</color>
+</resources>
