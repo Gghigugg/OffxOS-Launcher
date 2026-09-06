@@ -1,6 +1,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
     <uses-permission android:name="android.permission.QUERY_ALL_PACKAGES" />
     <uses-permission android:name="android.permission.CAMERA" />
+    <uses-permission android:name="android.permission.BIND_APPWIDGET" />
     <uses-feature android:name="android.hardware.camera.flash" android:required="false" />
     <application android:theme="@style/AppTheme" android:label="OffxOS Launcher" android:allowBackup="false" android:supportsRtl="true">
         <activity android:name=".MainActivity" android:screenOrientation="portrait" android:exported="true" android:enableOnBackInvokedCallback="true">
@@ -11,6 +12,7 @@
             </intent-filter>
         </activity>
         <activity android:name=".HomeSettingsActivity" android:screenOrientation="portrait" android:exported="false" />
+        <activity android:name=".WidgetsActivity" android:screenOrientation="portrait" android:exported="false" />
         <activity android:name=".LockScreenActivity" android:screenOrientation="portrait" android:exported="false" />
         <activity android:name=".NotificationCenterActivity" android:screenOrientation="portrait" android:exported="false" />
         <activity android:name=".MusicPanelActivity" android:screenOrientation="portrait" android:exported="false" />
