@@ -8,42 +8,37 @@ import android.view.Gravity;
 import android.view.MotionEvent;
 import android.view.View;
 import android.widget.*;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 
 public class NotificationCenterActivity extends Activity {
     int dp(float n){return (int)(n*getResources().getDisplayMetrics().density+.5f);}
     GradientDrawable glass(){GradientDrawable g=new GradientDrawable();g.setColor(0x30FFFFFF);g.setCornerRadius(dp(24));g.setStroke(dp(1),0x40FFFFFF);return g;}
     TextView t(String s,float z){TextView v=new TextView(this);v.setText(s);v.setTextColor(Color.WHITE);v.setTextSize(z);v.setGravity(Gravity.CENTER_VERTICAL);return v;}
-
     @Override public void onCreate(Bundle b){super.onCreate(b);getWindow().setStatusBarColor(Color.TRANSPARENT);getWindow().setNavigationBarColor(Color.BLACK);build();}
-
     void build(){
         LinearLayout root=new LinearLayout(this);root.setOrientation(LinearLayout.VERTICAL);root.setPadding(dp(16),dp(38),dp(16),dp(12));root.setBackgroundColor(0xFF08090D);
         LinearLayout head=new LinearLayout(this);head.setGravity(Gravity.CENTER_VERTICAL);
         TextView title=t("Notifications",28);title.setTypeface(null,1);head.addView(title,new LinearLayout.LayoutParams(0,dp(50),1));
-        TextView clear=t("Clear",13);clear.setGravity(Gravity.CENTER);clear.setBackground(glass());clear.setOnClickListener(v->{for(OffxNotificationService.Notice n:OffxNotificationService.getNotices())OffxNotificationService.dismissFromCenter(n.key);build();});
-        LinearLayout.LayoutParams clp=new LinearLayout.LayoutParams(dp(62),dp(42));clp.setMargins(0,0,dp(7),0);head.addView(clear,clp);
+        TextView count=t(String.valueOf(OffxNotificationService.getNotices().size()),13);count.setGravity(Gravity.CENTER);count.setBackground(glass());LinearLayout.LayoutParams cp=new LinearLayout.LayoutParams(dp(42),dp(42));cp.setMargins(0,0,dp(7),0);head.addView(count,cp);
+        TextView clear=t("Clear",13);clear.setGravity(Gravity.CENTER);clear.setBackground(glass());clear.setOnClickListener(v->{for(OffxNotificationService.Notice n:OffxNotificationService.getNotices())OffxNotificationService.dismissFromCenter(n.key);build();});LinearLayout.LayoutParams clp=new LinearLayout.LayoutParams(dp(62),dp(42));clp.setMargins(0,0,dp(7),0);head.addView(clear,clp);
         TextView close=t("✕",20);close.setGravity(Gravity.CENTER);close.setBackground(glass());close.setOnClickListener(v->finish());head.addView(close,new LinearLayout.LayoutParams(dp(48),dp(48)));root.addView(head);
         TextView sub=t("OffxOS Notification Center  •  swipe left to dismiss",12);sub.setTextColor(0xAAFFFFFF);root.addView(sub,new LinearLayout.LayoutParams(-1,dp(28)));
         ScrollView scroll=new ScrollView(this);LinearLayout list=new LinearLayout(this);list.setOrientation(LinearLayout.VERTICAL);list.setPadding(0,dp(8),0,dp(8));
         List<OffxNotificationService.Notice> notes=OffxNotificationService.getNotices();
-        if(notes.isEmpty()){TextView empty=t("No recent notifications",16);empty.setGravity(Gravity.CENTER);list.addView(empty,new LinearLayout.LayoutParams(-1,dp(180)));}
+        if(notes.isEmpty()){TextView empty=t("No recent notifications\n\nNotifications will appear here when access is enabled.",16);empty.setGravity(Gravity.CENTER);empty.setTextColor(0xAAFFFFFF);list.addView(empty,new LinearLayout.LayoutParams(-1,dp(220)));}
         else for(OffxNotificationService.Notice n:notes) addCard(list,n);
         scroll.addView(list);root.addView(scroll,new LinearLayout.LayoutParams(-1,0,1));setContentView(root);
     }
-
     void addCard(LinearLayout list,OffxNotificationService.Notice n){
-        LinearLayout card=new LinearLayout(this);card.setOrientation(LinearLayout.VERTICAL);card.setPadding(dp(16),dp(12),dp(16),dp(12));card.setBackground(glass());
-        TextView a=t(n.title,16);a.setTypeface(null,1);card.addView(a,new LinearLayout.LayoutParams(-1,dp(28)));
+        LinearLayout card=new LinearLayout(this);card.setOrientation(LinearLayout.VERTICAL);card.setPadding(dp(16),dp(12),dp(16),dp(10));card.setBackground(glass());
+        TextView a=t(n.title,16);a.setTypeface(null,1);card.addView(a,new LinearLayout.LayoutParams(-1,dp(27)));
         TextView body=t(n.text,13);body.setTextColor(0xCCFFFFFF);body.setMaxLines(2);card.addView(body,new LinearLayout.LayoutParams(-1,dp(34)));
-        TextView app=t(n.app,10);app.setTextColor(0x88FFFFFF);card.addView(app,new LinearLayout.LayoutParams(-1,dp(20)));
+        TextView app=t(n.app+"  •  "+new SimpleDateFormat("HH:mm",Locale.getDefault()).format(new Date(n.when)),10);app.setTextColor(0x88FFFFFF);card.addView(app,new LinearLayout.LayoutParams(-1,dp(20)));
         final float[] down={0};
-        card.setOnTouchListener((v,e)->{
-            if(e.getAction()==MotionEvent.ACTION_DOWN){down[0]=e.getX();return true;}
-            if(e.getAction()==MotionEvent.ACTION_MOVE){float dx=e.getX()-down[0];if(dx<0){v.setTranslationX(dx);v.setAlpha(Math.max(.25f,1f+dx/dp(220)));}return true;}
-            if(e.getAction()==MotionEvent.ACTION_UP){float dx=e.getX()-down[0];if(dx<-dp(90)){v.animate().translationX(-card.getWidth()).alpha(0).setDuration(180).withEndAction(()->{OffxNotificationService.dismissFromCenter(n.key);build();}).start();}else v.animate().translationX(0).alpha(1).setDuration(160).start();return true;}
-            if(e.getAction()==MotionEvent.ACTION_CANCEL){v.animate().translationX(0).alpha(1).setDuration(160).start();return true;}return true;
-        });
-        LinearLayout.LayoutParams cp=new LinearLayout.LayoutParams(-1,dp(96));cp.setMargins(0,dp(6),0,dp(6));list.addView(card,cp);
+        card.setOnTouchListener((v,e)->{if(e.getAction()==MotionEvent.ACTION_DOWN){down[0]=e.getX();return true;}if(e.getAction()==MotionEvent.ACTION_MOVE){float dx=e.getX()-down[0];if(dx<0){v.setTranslationX(dx);v.setAlpha(Math.max(.25f,1f+dx/dp(220)));}return true;}if(e.getAction()==MotionEvent.ACTION_UP){float dx=e.getX()-down[0];if(dx<-dp(90)){v.animate().translationX(-card.getWidth()).alpha(0).setDuration(180).withEndAction(()->{OffxNotificationService.dismissFromCenter(n.key);build();}).start();}else v.animate().translationX(0).alpha(1).setDuration(160).start();return true;}if(e.getAction()==MotionEvent.ACTION_CANCEL){v.animate().translationX(0).alpha(1).setDuration(160).start();return true;}return true;});
+        LinearLayout.LayoutParams lp=new LinearLayout.LayoutParams(-1,dp(96));lp.setMargins(0,dp(6),0,dp(6));list.addView(card,lp);
     }
 }
