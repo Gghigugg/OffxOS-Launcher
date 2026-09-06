@@ -9,6 +9,7 @@ public class DynamicWallpaperView extends View {
     private final PerformanceStore performance;
     private final ThemeStore theme;
     private float phase=0f;
+    private long lastFrame=0L;
     public DynamicWallpaperView(Context c){
         super(c);
         performance=new PerformanceStore(c);
@@ -22,10 +23,18 @@ public class DynamicWallpaperView extends View {
         boolean light=theme.isLight();
         c.drawColor(light?0xFFF4F6FA:0xFF08090D);
         if(performance.isLiteMode()){
+            paint.setShader(null);
             removeCallbacks(invalidateTask);
             return;
         }
-        phase+=0.006f;
+        long now=System.currentTimeMillis();
+        if(lastFrame!=0L){
+            long elapsed=now-lastFrame;
+            phase+=Math.min(elapsed,120L)*0.000075f;
+        }else{
+            phase+=0.006f;
+        }
+        lastFrame=now;
         float x1=w*(0.30f+0.12f*(float)Math.sin(phase));
         float y1=h*(0.28f+0.10f*(float)Math.cos(phase*1.2f));
         float x2=w*(0.72f+0.10f*(float)Math.cos(phase*.8f));
@@ -37,11 +46,12 @@ public class DynamicWallpaperView extends View {
         RadialGradient g2=new RadialGradient(x2,y2,w*.50f,new int[]{c2,light?0x182F6BFF:0x222F6BFF,0x00000000},new float[]{0f,.45f,1f},Shader.TileMode.CLAMP);
         paint.setShader(g2);c.drawRect(0,0,w,h,paint);
         paint.setShader(null);
-        postDelayed(invalidateTask,80);
+        postDelayed(invalidateTask,90);
     }
     private final Runnable invalidateTask=new Runnable(){@Override public void run(){invalidate();}};
     @Override protected void onDetachedFromWindow(){
         removeCallbacks(invalidateTask);
+        lastFrame=0L;
         super.onDetachedFromWindow();
     }
 }
