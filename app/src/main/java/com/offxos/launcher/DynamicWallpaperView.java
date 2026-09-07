@@ -28,7 +28,7 @@ public class DynamicWallpaperView extends FrameLayout {
 
     public DynamicWallpaperView(Context c){
         super(c); performance=new PerformanceStore(c); theme=new ThemeStore(c); widgetHost=new OffxWidgetHost(c);
-        widgetScroll=new HorizontalScrollView(c); widgetScroll.setHorizontalScrollBarEnabled(false); widgetScroll.setClipChildren(false); widgetScroll.setClipToPadding(false); widgetScroll.setPadding(dp(10),dp(4),dp(10),dp(4));
+        widgetScroll=new HorizontalScrollView(c); widgetScroll.setHorizontalScrollBarEnabled(false); widgetScroll.setClipChildren(false); widgetScroll.setClipToPadding(false); widgetScroll.setFadingEdgeLength(dp(22)); widgetScroll.setHorizontalFadingEdgeEnabled(true); widgetScroll.setPadding(dp(10),dp(4),dp(10),dp(4));
         widgetLayer=new LinearLayout(c); widgetLayer.setOrientation(LinearLayout.HORIZONTAL); widgetLayer.setGravity(Gravity.CENTER_VERTICAL); widgetLayer.setClipChildren(false); widgetLayer.setClipToPadding(false);
         widgetScroll.addView(widgetLayer,new HorizontalScrollView.LayoutParams(-2,-1)); addView(widgetScroll,new FrameLayout.LayoutParams(-1,dp(190),Gravity.BOTTOM));
         setLayerType(View.LAYER_TYPE_HARDWARE,null); setWillNotDraw(false);
@@ -47,20 +47,19 @@ public class DynamicWallpaperView extends FrameLayout {
         for(int id:ordered){
             AppWidgetProviderInfo info=manager.getAppWidgetInfo(id);
             if(info==null){try{widgetHost.deleteAppWidgetId(id);}catch(Exception ignored){} OffxHomeWidgetStore.remove(getContext(),id); OffxHomeWidgetLayoutStore.remove(getContext(),id); OffxHomeWidgetOrderStore.remove(getContext(),id); continue;}
-            try{addHomeWidget(id,info,index++);}catch(Exception ignored){}
-        }
+            try{addHomeWidget(id,info,index++);}catch(Exception ignored){}}
         widgetScroll.setVisibility(widgetLayer.getChildCount()==0?View.GONE:View.VISIBLE);
     }
     private void addHomeWidget(int id,AppWidgetProviderInfo info,int index){
         final int size=OffxHomeWidgetLayoutStore.size(getContext(),id); int height=size==0?118:(size==2?174:146); int width=(int)(getResources().getDisplayMetrics().widthPixels*.82f);
-        LinearLayout card=new LinearLayout(getContext()); card.setOrientation(LinearLayout.VERTICAL); card.setPadding(dp(8),dp(8),dp(8),dp(8)); card.setBackground(widgetGlass());
+        LinearLayout card=new LinearLayout(getContext()); card.setOrientation(LinearLayout.VERTICAL); card.setPadding(dp(8),dp(8),dp(8),dp(8)); card.setBackground(widgetGlass()); card.setElevation(dp(8)); card.setOnClickListener(v->PremiumHomeMotion.press(card,performance.isLiteMode()));
         AppWidgetHostView view=widgetHost.createView(getContext(),id,info); view.setPadding(dp(2),dp(2),dp(2),dp(2)); view.setOnLongClickListener(v->{showWidgetEditor(id);return true;}); card.addView(view,new LinearLayout.LayoutParams(-1,0,1));
-        TextView edit=widgetLabel("Widget • long press to edit"); edit.setOnClickListener(v->showWidgetEditor(id)); card.addView(edit,new LinearLayout.LayoutParams(-1,dp(28)));
+        TextView edit=widgetLabel("•••  Widget options  •••"); edit.setOnClickListener(v->showWidgetEditor(id)); card.addView(edit,new LinearLayout.LayoutParams(-1,dp(28)));
         LinearLayout.LayoutParams cp=new LinearLayout.LayoutParams(width,dp(height)); cp.setMargins(dp(6),dp(8),dp(6),dp(8)); widgetLayer.addView(card,cp); PremiumHomeMotion.entrance(card,index,performance.isLiteMode());
         if(android.os.Build.VERSION.SDK_INT>=31){try{java.util.ArrayList<android.util.SizeF> sizes=new java.util.ArrayList<>(); sizes.add(new android.util.SizeF(width/getResources().getDisplayMetrics().density,height/getResources().getDisplayMetrics().density)); view.updateAppWidgetSize(new android.os.Bundle(),sizes);}catch(Exception ignored){}}
         else{try{view.updateAppWidgetSize(new android.os.Bundle(),dp(120),dp(80),width,dp(190));}catch(Exception ignored){}}
     }
-    private TextView widgetLabel(String text){TextView t=new TextView(getContext());t.setText(text);t.setTextColor(0xAAFFFFFF);t.setTextSize(10);t.setGravity(Gravity.CENTER);return t;}
+    private TextView widgetLabel(String text){TextView t=new TextView(getContext());t.setText(text);t.setTextColor(theme.isLight()?0x99000000:0xAAFFFFFF);t.setTextSize(10);t.setGravity(Gravity.CENTER);t.setAllCaps(false);return t;}
     private void showWidgetEditor(int id){
         final String[] items={"Move Left","Move Right","Compact widget","Standard widget","Large widget","Remove widget"};
         new AlertDialog.Builder(getContext()).setTitle("OffxOS Widget").setItems(items,(d,which)->{
@@ -70,7 +69,7 @@ public class DynamicWallpaperView extends FrameLayout {
             else{try{widgetHost.deleteAppWidgetId(id);}catch(Exception ignored){} OffxHomeWidgetStore.remove(getContext(),id); OffxHomeWidgetLayoutStore.remove(getContext(),id); OffxHomeWidgetOrderStore.remove(getContext(),id); restoreWidgets();}
         }).show();
     }
-    private android.graphics.drawable.GradientDrawable widgetGlass(){android.graphics.drawable.GradientDrawable g=new android.graphics.drawable.GradientDrawable();g.setColor(theme.isLight()?0xEAFBFCFF:0xCC151821);g.setCornerRadius(dp(26));g.setStroke(dp(1),theme.isLight()?0x55FFFFFF:0x35FFFFFF);return g;}
+    private android.graphics.drawable.GradientDrawable widgetGlass(){android.graphics.drawable.GradientDrawable g=new android.graphics.drawable.GradientDrawable();g.setColor(theme.isLight()?0xEAFBFCFF:0xCC151821);g.setCornerRadius(dp(26));g.setStroke(dp(1),theme.isLight()?0x66FFFFFF:0x45FFFFFF);return g;}
     @Override protected void onDraw(Canvas c){
         super.onDraw(c); int w=getWidth(),h=getHeight(); if(w<=0||h<=0)return; boolean light=theme.isLight(); c.drawColor(light?0xFFF4F6FA:0xFF08090D);
         if(performance.isLiteMode()){paint.setShader(null);removeCallbacks(invalidateTask);return;} long now=System.currentTimeMillis(); if(lastFrame!=0L){long elapsed=now-lastFrame;phase+=Math.min(elapsed,120L)*0.000075f;}else phase+=0.006f; lastFrame=now;
