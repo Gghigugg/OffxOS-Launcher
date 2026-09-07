@@ -12,6 +12,7 @@
             </intent-filter>
         </activity>
         <activity android:name=".HomeSettingsActivity" android:screenOrientation="portrait" android:exported="false" />
+        <activity android:name=".HomeEditActivity" android:screenOrientation="portrait" android:exported="false" />
         <activity android:name=".WidgetsActivity" android:screenOrientation="portrait" android:exported="false" />
         <activity android:name=".LockScreenActivity" android:screenOrientation="portrait" android:exported="false" />
         <activity android:name=".NotificationCenterActivity" android:screenOrientation="portrait" android:exported="false" />
