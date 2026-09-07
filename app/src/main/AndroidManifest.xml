@@ -17,6 +17,9 @@
         <activity android:name=".NotificationCenterActivity" android:screenOrientation="portrait" android:exported="false" />
         <activity android:name=".MusicPanelActivity" android:screenOrientation="portrait" android:exported="false" />
         <activity android:name=".AppDrawerActivity" android:screenOrientation="portrait" android:exported="false" />
+        <receiver android:name=".OffxWidgetRestoreReceiver" android:exported="false">
+            <intent-filter><action android:name="android.appwidget.action.APPWIDGET_HOST_RESTORED" /></intent-filter>
+        </receiver>
         <service android:name=".OffxNotificationService" android:label="OffxOS Notifications" android:permission="android.permission.BIND_NOTIFICATION_LISTENER_SERVICE" android:exported="true">
             <intent-filter><action android:name="android.service.notification.NotificationListenerService" /></intent-filter>
         </service>
