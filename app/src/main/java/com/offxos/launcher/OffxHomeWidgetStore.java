@@ -15,29 +15,29 @@ public final class OffxHomeWidgetStore {
         ArrayList<Integer> out = new ArrayList<>();
         Set<String> saved = context.getSharedPreferences(PREFS, Context.MODE_PRIVATE)
                 .getStringSet(IDS, new LinkedHashSet<>());
-        for (String value : saved) {
-            try { out.add(Integer.parseInt(value)); }
-            catch (Exception ignored) {}
-        }
+        for (String value : saved) { try { out.add(Integer.parseInt(value)); } catch (Exception ignored) {} }
         return out;
     }
 
     public static void add(Context context, int id) {
         Set<String> next = new LinkedHashSet<>(loadStrings(context));
         next.add(String.valueOf(id));
-        context.getSharedPreferences(PREFS, Context.MODE_PRIVATE).edit()
-                .putStringSet(IDS, next).apply();
+        context.getSharedPreferences(PREFS, Context.MODE_PRIVATE).edit().putStringSet(IDS, next).apply();
     }
 
     public static void remove(Context context, int id) {
         Set<String> next = new LinkedHashSet<>(loadStrings(context));
         next.remove(String.valueOf(id));
-        context.getSharedPreferences(PREFS, Context.MODE_PRIVATE).edit()
-                .putStringSet(IDS, next).apply();
+        context.getSharedPreferences(PREFS, Context.MODE_PRIVATE).edit().putStringSet(IDS, next).apply();
+    }
+
+    public static void remap(Context context, int oldId, int newId) {
+        Set<String> next = new LinkedHashSet<>(loadStrings(context));
+        if (next.remove(String.valueOf(oldId))) next.add(String.valueOf(newId));
+        context.getSharedPreferences(PREFS, Context.MODE_PRIVATE).edit().putStringSet(IDS, next).apply();
     }
 
     private static Set<String> loadStrings(Context context) {
-        return new LinkedHashSet<>(context.getSharedPreferences(PREFS, Context.MODE_PRIVATE)
-                .getStringSet(IDS, new LinkedHashSet<>()));
+        return new LinkedHashSet<>(context.getSharedPreferences(PREFS, Context.MODE_PRIVATE).getStringSet(IDS, new LinkedHashSet<>()));
     }
 }
