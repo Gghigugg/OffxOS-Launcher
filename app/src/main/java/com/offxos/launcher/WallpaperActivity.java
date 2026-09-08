@@ -2,7 +2,6 @@ package com.offxos.launcher;
 
 import android.app.Activity;
 import android.app.WallpaperManager;
-import android.content.Context;
 import android.graphics.Color;
 import android.graphics.drawable.GradientDrawable;
 import android.os.Bundle;
@@ -16,10 +15,10 @@ public class WallpaperActivity extends Activity {
     @Override public void onCreate(Bundle b){super.onCreate(b); build();}
     void build(){
         LinearLayout root=new LinearLayout(this);root.setOrientation(LinearLayout.VERTICAL);root.setPadding(dp(18),dp(42),dp(18),dp(18));root.setBackgroundColor(0xFF08090D);
-        TextView title=tv("Wallpapers",26);title.setTypeface(null,1);root.addView(title,new LinearLayout.LayoutParams(-1,dp(54)));
-        TextView sub=tv("Choose your OffxOS Liquid Glass wallpaper",13);sub.setTextColor(0xAAFFFFFF);root.addView(sub,new LinearLayout.LayoutParams(-1,dp(34)));
-        int[] ids={R.drawable.wallpaper_aurora_glass,R.drawable.wallpaper_midnight_neon,R.drawable.wallpaper_cosmic_purple,R.drawable.wallpaper_ocean_glass,R.drawable.wallpaper_eclipse_glow};
-        String[] names={"Aurora Glass","Midnight Neon","Cosmic Purple","Ocean Glass","Eclipse Glow"};
+        TextView title=tv("Premium Wallpapers",26);title.setTypeface(null,1);root.addView(title,new LinearLayout.LayoutParams(-1,dp(54)));
+        TextView sub=tv("8 OffxOS Liquid Glass designs • tap to apply",13);sub.setTextColor(0xAAFFFFFF);root.addView(sub,new LinearLayout.LayoutParams(-1,dp(34)));
+        int[] ids={R.drawable.wallpaper_premium_01_aurora,R.drawable.wallpaper_premium_02_midnight,R.drawable.wallpaper_premium_03_violet,R.drawable.wallpaper_premium_04_ocean,R.drawable.wallpaper_premium_05_eclipse,R.drawable.wallpaper_premium_06_rose,R.drawable.wallpaper_premium_07_crystal,R.drawable.wallpaper_premium_08_nebula};
+        String[] names={"Aurora Glass","Midnight Neon","Violet Prism","Ocean Glass","Eclipse Glow","Rose Glass","Crystal Frost","Nebula Glass"};
         for(int i=0;i<ids.length;i++) addWallpaper(root,ids[i],names[i]);
         TextView reset=tv("Reset to Dynamic OffxOS",15);reset.setGravity(Gravity.CENTER);reset.setBackground(glass());reset.setOnClickListener(v->{WallpaperStore.clear(this);finish();});LinearLayout.LayoutParams rp=new LinearLayout.LayoutParams(-1,dp(58));rp.topMargin=dp(10);root.addView(reset,rp);
         setContentView(root);
