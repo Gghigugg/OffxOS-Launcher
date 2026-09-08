@@ -5,11 +5,12 @@ import java.util.ArrayList;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
-/** Ordered persistent widget IDs used by the OffxOS Home Screen and widget picker. */
+/** Ordered persistent widget IDs and Home placement used by OffxOS. */
 public final class OffxHomeWidgetStore {
     private static final String PREFS = "offx_home_widgets";
     private static final String IDS = "ids_csv";
     private static final String LEGACY_IDS = "ids";
+    private static final String POS_PREFIX = "pos_";
     private OffxHomeWidgetStore() {}
 
     public static ArrayList<Integer> load(Context context) {
@@ -39,6 +40,8 @@ public final class OffxHomeWidgetStore {
     public static void remove(Context context, int id) {
         ArrayList<Integer> next = load(context);
         next.remove(Integer.valueOf(id));
+        context.getSharedPreferences(PREFS, Context.MODE_PRIVATE).edit()
+                .remove(POS_PREFIX + id).apply();
         save(context, next);
     }
 
@@ -56,7 +59,36 @@ public final class OffxHomeWidgetStore {
         ArrayList<Integer> next = load(context);
         int index = next.indexOf(oldId);
         if (index >= 0) next.set(index, newId);
+        String oldPos = context.getSharedPreferences(PREFS, Context.MODE_PRIVATE)
+                .getString(POS_PREFIX + oldId, null);
+        if (oldPos != null) {
+            context.getSharedPreferences(PREFS, Context.MODE_PRIVATE).edit()
+                    .remove(POS_PREFIX + oldId).putString(POS_PREFIX + newId, oldPos).apply();
+        }
         save(context, next);
+    }
+
+    /** Save widget page/cell placement. spanX/spanY are the occupied cell size. */
+    public static void savePosition(Context context, int id, int page, int column,
+                                     int row, int spanX, int spanY) {
+        String value = page + "," + column + "," + row + "," + spanX + "," + spanY;
+        context.getSharedPreferences(PREFS, Context.MODE_PRIVATE).edit()
+                .putString(POS_PREFIX + id, value).apply();
+    }
+
+    /** Returns {page, column, row, spanX, spanY}, or null if not stored. */
+    public static int[] loadPosition(Context context, int id) {
+        String value = context.getSharedPreferences(PREFS, Context.MODE_PRIVATE)
+                .getString(POS_PREFIX + id, null);
+        if (value == null) return null;
+        String[] parts = value.split(",");
+        if (parts.length < 5) return null;
+        try {
+            return new int[]{Integer.parseInt(parts[0]), Integer.parseInt(parts[1]),
+                    Integer.parseInt(parts[2]), Integer.parseInt(parts[3]), Integer.parseInt(parts[4])};
+        } catch (Exception ignored) {
+            return null;
+        }
     }
 
     private static void save(Context context, ArrayList<Integer> ids) {
