@@ -1,7 +1,18 @@
 <resources>
 <style name="AppTheme" parent="android:style/Theme.Material.Light.NoActionBar">
-    <item name="android:fontFamily">sans</item><item name="android:windowActionModeOverlay">true</item>
-    <item name="android:colorAccent">#9B5CFF</item><item name="android:navigationBarColor">#08080D</item>
-    <item name="android:statusBarColor">#08080D</item><item name="android:windowLightStatusBar">false</item>
+    <item name="android:fontFamily">sans</item>
+    <item name="android:windowActionModeOverlay">true</item>
+    <item name="android:colorAccent">#9B5CFF</item>
+    <item name="android:navigationBarColor">#08080D</item>
+    <item name="android:statusBarColor">#08080D</item>
+    <item name="android:windowLightStatusBar">false</item>
+    <item name="android:windowAnimationStyle">@style/OffxOSWindowAnimation</item>
+</style>
+
+<style name="OffxOSWindowAnimation" parent="@android:style/Animation.Activity">
+    <item name="android:activityOpenEnterAnimation">@anim/offxos_enter</item>
+    <item name="android:activityOpenExitAnimation">@anim/offxos_pop_exit</item>
+    <item name="android:activityCloseEnterAnimation">@anim/offxos_pop_enter</item>
+    <item name="android:activityCloseExitAnimation">@anim/offxos_exit</item>
 </style>
 </resources>
