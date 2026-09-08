@@ -1,7 +1,7 @@
 name: Build OffxOS APK
 on:
   push:
-    branches: [ main ]
+    branches: [ main, fix/launcher-entry ]
   workflow_dispatch:
 jobs:
   build:
