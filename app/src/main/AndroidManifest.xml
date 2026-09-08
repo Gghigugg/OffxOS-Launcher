@@ -3,14 +3,33 @@
     <uses-permission android:name="android.permission.CAMERA" />
     <uses-permission android:name="android.permission.BIND_APPWIDGET" />
     <uses-feature android:name="android.hardware.camera.flash" android:required="false" />
-    <application android:theme="@style/AppTheme" android:label="OffxOS Launcher" android:allowBackup="false" android:supportsRtl="true">
-        <activity android:name=".MainActivity" android:screenOrientation="portrait" android:exported="true" android:enableOnBackInvokedCallback="true">
+
+    <application
+        android:theme="@style/AppTheme"
+        android:label="OffxOS Launcher"
+        android:icon="@mipmap/ic_launcher"
+        android:roundIcon="@mipmap/ic_launcher_round"
+        android:allowBackup="false"
+        android:supportsRtl="true">
+
+        <activity
+            android:name=".MainActivity"
+            android:screenOrientation="portrait"
+            android:exported="true"
+            android:enableOnBackInvokedCallback="true">
+            <!-- Home/default launcher entry point -->
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.HOME" />
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
+            <!-- Also expose OffxOS as a normal app entry point -->
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
         </activity>
+
         <activity android:name=".HomeSettingsActivity" android:screenOrientation="portrait" android:exported="false" />
         <activity android:name=".HomeEditActivity" android:screenOrientation="portrait" android:exported="false" />
         <activity android:name=".WidgetsActivity" android:screenOrientation="portrait" android:exported="false" />
@@ -18,11 +37,21 @@
         <activity android:name=".NotificationCenterActivity" android:screenOrientation="portrait" android:exported="false" />
         <activity android:name=".MusicPanelActivity" android:screenOrientation="portrait" android:exported="false" />
         <activity android:name=".AppDrawerActivity" android:screenOrientation="portrait" android:exported="false" />
+
         <receiver android:name=".OffxWidgetRestoreReceiver" android:exported="false">
-            <intent-filter><action android:name="android.appwidget.action.APPWIDGET_HOST_RESTORED" /></intent-filter>
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_HOST_RESTORED" />
+            </intent-filter>
         </receiver>
-        <service android:name=".OffxNotificationService" android:label="OffxOS Notifications" android:permission="android.permission.BIND_NOTIFICATION_LISTENER_SERVICE" android:exported="true">
-            <intent-filter><action android:name="android.service.notification.NotificationListenerService" /></intent-filter>
+
+        <service
+            android:name=".OffxNotificationService"
+            android:label="OffxOS Notifications"
+            android:permission="android.permission.BIND_NOTIFICATION_LISTENER_SERVICE"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.service.notification.NotificationListenerService" />
+            </intent-filter>
         </service>
     </application>
 </manifest>
