@@ -2,6 +2,7 @@
     <uses-permission android:name="android.permission.QUERY_ALL_PACKAGES" />
     <uses-permission android:name="android.permission.CAMERA" />
     <uses-permission android:name="android.permission.BIND_APPWIDGET" />
+    <uses-permission android:name="android.permission.SET_WALLPAPER" />
     <uses-feature android:name="android.hardware.camera.flash" android:required="false" />
 
     <application
@@ -17,13 +18,11 @@
             android:screenOrientation="portrait"
             android:exported="true"
             android:enableOnBackInvokedCallback="true">
-            <!-- Home/default launcher entry point -->
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.HOME" />
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
-            <!-- Also expose OffxOS as a normal app entry point -->
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
@@ -33,6 +32,7 @@
         <activity android:name=".HomeSettingsActivity" android:screenOrientation="portrait" android:exported="false" />
         <activity android:name=".HomeEditActivity" android:screenOrientation="portrait" android:exported="false" />
         <activity android:name=".WidgetsActivity" android:screenOrientation="portrait" android:exported="false" />
+        <activity android:name=".WallpaperActivity" android:screenOrientation="portrait" android:exported="false" />
         <activity android:name=".LockScreenActivity" android:screenOrientation="portrait" android:exported="false" />
         <activity android:name=".NotificationCenterActivity" android:screenOrientation="portrait" android:exported="false" />
         <activity android:name=".MusicPanelActivity" android:screenOrientation="portrait" android:exported="false" />
