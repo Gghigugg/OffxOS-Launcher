@@ -5,6 +5,7 @@ import android.appwidget.AppWidgetManager;
 import android.appwidget.AppWidgetProviderInfo;
 import android.content.Context;
 import android.graphics.*;
+import android.graphics.drawable.Drawable;
 import android.view.Gravity;
 import android.view.View;
 import android.widget.FrameLayout;
@@ -71,7 +72,15 @@ public class DynamicWallpaperView extends FrameLayout {
     }
     private android.graphics.drawable.GradientDrawable widgetGlass(){android.graphics.drawable.GradientDrawable g=new android.graphics.drawable.GradientDrawable();g.setColor(theme.isLight()?0xEAFBFCFF:0xCC151821);g.setCornerRadius(dp(26));g.setStroke(dp(1),theme.isLight()?0x66FFFFFF:0x45FFFFFF);return g;}
     @Override protected void onDraw(Canvas c){
-        super.onDraw(c); int w=getWidth(),h=getHeight(); if(w<=0||h<=0)return; boolean light=theme.isLight(); c.drawColor(light?0xFFF4F6FA:0xFF08090D);
+        super.onDraw(c); int w=getWidth(),h=getHeight(); if(w<=0||h<=0)return; boolean light=theme.isLight();
+        int selected=WallpaperStore.get(getContext());
+        if(selected!=0){
+            Drawable drawable=getResources().getDrawable(selected,null);
+            drawable.setBounds(0,0,w,h);
+            drawable.draw(c);
+            return;
+        }
+        c.drawColor(light?0xFFF4F6FA:0xFF08090D);
         if(performance.isLiteMode()){paint.setShader(null);removeCallbacks(invalidateTask);return;} long now=System.currentTimeMillis(); if(lastFrame!=0L){long elapsed=now-lastFrame;phase+=Math.min(elapsed,120L)*0.000075f;}else phase+=0.006f; lastFrame=now;
         float x1=w*(0.30f+0.12f*(float)Math.sin(phase)); float y1=h*(0.28f+0.10f*(float)Math.cos(phase*1.2f)); float x2=w*(0.72f+0.10f*(float)Math.cos(phase*.8f)); float y2=h*(0.70f+0.10f*(float)Math.sin(phase));
         int c1=light?0x553C8DFF:0x663C8DFF; int c2=light?0x55FF2F92:0x66FF2F92; RadialGradient g1=new RadialGradient(x1,y1,w*.55f,new int[]{c1,light?0x182F6BFF:0x223C8DFF,0x00000000},new float[]{0f,.45f,1f},Shader.TileMode.CLAMP); paint.setShader(g1);c.drawRect(0,0,w,h,paint);
