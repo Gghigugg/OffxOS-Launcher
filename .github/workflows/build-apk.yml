@@ -1,27 +1,66 @@
-name: Build OffxOS APK
+name: Build OffxOS Release APK
+
 on:
   push:
     branches: [ main ]
   workflow_dispatch:
+
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+
       - name: Set up Java
         uses: actions/setup-java@v4
         with:
           distribution: temurin
           java-version: '17'
+
       - name: Set up Gradle
         uses: gradle/actions/setup-gradle@v4
         with:
           gradle-version: '8.7'
-      - name: Build debug APK
-        run: gradle assembleDebug --stacktrace
-      - name: Upload APK
+
+      - name: Create temporary release signing key
+        shell: bash
+        run: |
+          set -euo pipefail
+          PASS="$(openssl rand -hex 24)"
+          KEYSTORE="$RUNNER_TEMP/offxos-release.keystore"
+          mkdir -p "$(dirname "$KEYSTORE")"
+          keytool -genkeypair -v \
+            -keystore "$KEYSTORE" \
+            -storepass "$PASS" \
+            -keypass "$PASS" \
+            -alias offxos \
+            -keyalg RSA \
+            -keysize 2048 \
+            -validity 10000 \
+            -dname "CN=OffxOS Launcher, OU=OffxOS, O=OffxOS, L=Unknown, S=Unknown, C=IN"
+          echo "OFFXOS_STORE_PASSWORD=$PASS" >> "$GITHUB_ENV"
+          echo "OFFXOS_KEYSTORE=$KEYSTORE" >> "$GITHUB_ENV"
+
+      - name: Build Release APK
+        run: gradle assembleRelease --stacktrace
+
+      - name: Verify Release APK signature
+        shell: bash
+        run: |
+          set -euo pipefail
+          APK="app/build/outputs/apk/release/app-release.apk"
+          APKSIGNER="$(find "$ANDROID_HOME/build-tools" -type f -name apksigner | sort -V | tail -n 1)"
+          test -n "$APKSIGNER"
+          test -s "$APK"
+          "$APKSIGNER" verify --verbose "$APK"
+          sha256sum "$APK" | tee "$APK.sha256"
+          ls -lh "$APK"
+
+      - name: Upload verified Release APK
         uses: actions/upload-artifact@v4
         with:
-          name: OffxOS-Launcher-debug
-          path: app/build/outputs/apk/debug/app-debug.apk
+          name: OffxOS-Launcher-release
+          path: |
+            app/build/outputs/apk/release/app-release.apk
+            app/build/outputs/apk/release/app-release.apk.sha256
