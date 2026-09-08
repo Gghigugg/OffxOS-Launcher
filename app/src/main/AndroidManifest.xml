@@ -2,8 +2,9 @@
     <uses-permission android:name="android.permission.QUERY_ALL_PACKAGES" />
     <uses-permission android:name="android.permission.CAMERA" />
     <uses-permission android:name="android.permission.BIND_APPWIDGET" />
+    <uses-permission android:name="android.permission.SET_WALLPAPER" />
     <uses-feature android:name="android.hardware.camera.flash" android:required="false" />
-    <application android:theme="@style/AppTheme" android:label="OffxOS Launcher" android:allowBackup="false" android:supportsRtl="true">
+    <application android:theme="@style/AppTheme" android:label="OffxOS Launcher" android:icon="@mipmap/ic_launcher" android:roundIcon="@mipmap/ic_launcher_round" android:allowBackup="false" android:supportsRtl="true">
         <activity android:name=".MainActivity" android:screenOrientation="portrait" android:exported="true" android:enableOnBackInvokedCallback="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -14,6 +15,7 @@
         <activity android:name=".HomeSettingsActivity" android:screenOrientation="portrait" android:exported="false" />
         <activity android:name=".HomeEditActivity" android:screenOrientation="portrait" android:exported="false" />
         <activity android:name=".WidgetsActivity" android:screenOrientation="portrait" android:exported="false" />
+        <activity android:name=".WallpaperActivity" android:screenOrientation="portrait" android:exported="false" />
         <activity android:name=".LockScreenActivity" android:screenOrientation="portrait" android:exported="false" />
         <activity android:name=".NotificationCenterActivity" android:screenOrientation="portrait" android:exported="false" />
         <activity android:name=".MusicPanelActivity" android:screenOrientation="portrait" android:exported="false" />
