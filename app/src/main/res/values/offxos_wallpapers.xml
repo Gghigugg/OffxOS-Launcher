@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="offxos_wallpaper_aurora_start">#FF050611</color>
+    <color name="offxos_wallpaper_aurora_end">#FF4B174E</color>
+    <color name="offxos_wallpaper_midnight">#FF050611</color>
+    <color name="offxos_wallpaper_ocean">#FF031A2B</color>
+    <color name="offxos_wallpaper_cosmic">#FF16051F</color>
+</resources>
