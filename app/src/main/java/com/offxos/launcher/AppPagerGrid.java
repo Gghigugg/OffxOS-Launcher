@@ -59,6 +59,7 @@ public class AppPagerGrid extends LinearLayout {
             currentPage.setGravity(Gravity.TOP|Gravity.CENTER_HORIZONTAL);
             pages.addView(currentPage,new LinearLayout.LayoutParams(-1,-1));
             rowCount=0;
+            post(this::updatePageWidths);
         }
         currentPage.addView(child, params);
         rowCount++;
@@ -68,6 +69,7 @@ public class AppPagerGrid extends LinearLayout {
     @Override protected void onSizeChanged(int w,int h,int oldw,int oldh){
         super.onSizeChanged(w,h,oldw,oldh);
         recalculateRows();
+        updatePageWidths();
     }
 
     private void recalculateRows(){
@@ -75,8 +77,24 @@ public class AppPagerGrid extends LinearLayout {
         if(h>0) rowsPerPage=Math.max(4,Math.min(6,h/dp(94)));
     }
 
+    private void updatePageWidths(){
+        int w=getWidth();
+        if(w<=0)return;
+        for(int i=0;i<pages.getChildCount();i++){
+            View p=pages.getChildAt(i);
+            p.getLayoutParams().width=w;
+            p.getLayoutParams().height=-1;
+            p.requestLayout();
+        }
+    }
+
     private void updateDots(){
         int count=pages==null?0:pages.getChildCount();
-        if(dots!=null) dots.setText(count<=1?"":"●  ".repeat(count).trim());
+        if(dots==null)return;
+        if(count<=1){dots.setText("");return;}
+        int page=scroller.getScrollX()/Math.max(1,getWidth());
+        StringBuilder b=new StringBuilder();
+        for(int i=0;i<count;i++) b.append(i==page?"● ":"○ ");
+        dots.setText(b.toString().trim());
     }
 }
