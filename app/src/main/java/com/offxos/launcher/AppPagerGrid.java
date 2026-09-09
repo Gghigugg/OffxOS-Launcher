@@ -4,14 +4,15 @@ import android.content.Context;
 import android.util.AttributeSet;
 import android.view.Gravity;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.HorizontalScrollView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
-/** iPhone-style horizontal home pages. Existing render() code can keep adding rows normally. */
+/** iPhone-style horizontal home pages. */
 public class AppPagerGrid extends LinearLayout {
-    private final HorizontalScrollView scroller;
-    private final LinearLayout pages;
+    private HorizontalScrollView scroller;
+    private LinearLayout pages;
     private LinearLayout currentPage;
     private int rowsPerPage = 5;
     private int rowCount = 0;
@@ -34,7 +35,6 @@ public class AppPagerGrid extends LinearLayout {
         dots.setTextColor(0xBFFFFFFF);
         dots.setTextSize(10);
         dots.setGravity(Gravity.CENTER);
-        dots.setPadding(0,0,0,2);
         super.addView(dots, new LinearLayout.LayoutParams(-1,dp(20)));
         scroller.setOnScrollChangeListener((v,x,y,oldx,oldy)->updateDots());
         post(this::recalculateRows);
@@ -51,7 +51,7 @@ public class AppPagerGrid extends LinearLayout {
         updateDots();
     }
 
-    @Override public void addView(View child, LayoutParams params){
+    @Override public void addView(View child, ViewGroup.LayoutParams params){
         if(child==dots || child==scroller){ super.addView(child, params); return; }
         if(currentPage==null || rowCount>=rowsPerPage){
             currentPage=new LinearLayout(getContext());
@@ -82,9 +82,9 @@ public class AppPagerGrid extends LinearLayout {
         if(w<=0)return;
         for(int i=0;i<pages.getChildCount();i++){
             View p=pages.getChildAt(i);
-            p.getLayoutParams().width=w;
-            p.getLayoutParams().height=-1;
-            p.requestLayout();
+            ViewGroup.LayoutParams lp=p.getLayoutParams();
+            lp.width=w; lp.height=-1;
+            p.setLayoutParams(lp);
         }
     }
 
