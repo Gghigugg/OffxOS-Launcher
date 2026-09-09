@@ -1,4 +1,4 @@
-name: Build OffxOS Release APK
+name: Build OffxOS Launcher 10.0 Release APK
 
 on:
   push:
@@ -75,7 +75,7 @@ jobs:
       - name: Upload verified Release APK
         uses: actions/upload-artifact@v4
         with:
-          name: OffxOS-Launcher-release
+          name: OffxOS-Launcher-v10-release
           path: |
             app/build/outputs/apk/release/app-release.apk
             app/build/outputs/apk/release/app-release.apk.sha256
