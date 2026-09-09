@@ -5,13 +5,12 @@
 
     <application
         android:theme="@style/AppTheme"
-        android:label="OffxOS Launcher"
+        android:label="OffxOS Launcher 10"
         android:icon="@mipmap/ic_launcher"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:allowBackup="false"
         android:supportsRtl="true">
 
-        <!-- Real Android HOME entry. It is not exposed as the normal app icon. -->
         <activity
             android:name=".MainActivity"
             android:screenOrientation="portrait"
@@ -24,7 +23,6 @@
             </intent-filter>
         </activity>
 
-        <!-- Normal app icon: setup gate, never the full launcher/app drawer directly. -->
         <activity
             android:name=".SetupActivity"
             android:screenOrientation="portrait"
